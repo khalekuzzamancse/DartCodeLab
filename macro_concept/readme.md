@@ -57,6 +57,7 @@ If you need to use a separate Dart SDK (such as a specific version like Dart Dev
  - You can not run direcly the `main` function  use the  following command:
    - Move the directory where 
    - `dart run --enable-experiment=macros main.dart`
+   - for logging `dart run --verbose  --enable-experiment=macros main.dart` , output will be in the terminal
    - here `main.dart` is the file file in that current directory
    - if you have the file in the `lib` directory then move to the libs and then run this command with the file name
 -Additionally tips:
