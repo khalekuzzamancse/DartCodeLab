@@ -1,11 +1,12 @@
+import 'package:network/network_factory.dart';
 import 'package:test/test.dart';
-import '../lib/api_client.dart';
 import '../lib/json_parser.dart';
 
 void main() {
   group('API client test', () {
+
     test('read', () async {
-      final client = ApiClient.create();
+      final client = NetworkFactory.createApiClient();
       final url = 'https://api.github.com/users/khalekuzzamancse';
 
       try {
@@ -17,8 +18,10 @@ void main() {
         fail('Exception thrown: $e');
       }
     });
+
+
     test(' read and convert to model', () async {
-      final client = ApiClient.create();
+    final client = NetworkFactory.createApiClient<_User>();
       final url = 'https://api.github.com/users/khalekuzzamancse';
 
       try {
@@ -34,8 +37,10 @@ void main() {
         fail('Exception thrown: $e');
       }
     });
+
+
     test('read and parse using ApiClient', () async {
-      final client = ApiClient.create();
+     final client = NetworkFactory.createApiClient<_User>();
       final url = 'https://api.github.com/users/khalekuzzamancse';
 
       try {
@@ -43,13 +48,60 @@ void main() {
         print('$user');
 
         expect(user, isNotNull);
-        expect(user.login,
-            contains('khalekuzzamancse')); 
+        expect(user.login, contains('khalekuzzamancse'));
+      } catch (e) {
+        fail('Exception thrown: $e');
+      }
+    });
+
+
+    test('read and parse as List', () async {
+        final client = NetworkFactory.createApiClient<_GitHubIssue>();
+      final url =
+          'https://api.github.com/repos/flutter/flutter/issues?per_page=10';
+
+      try {
+        final issueList = await client.readParseListOrThrow<_GitHubIssue>(
+            url, _GitHubIssue.fromJson);
+
+        issueList.forEach((issue) {
+          print('$issue\n');
+        });
+        expect(issueList, isNotNull);
+        expect(true, issueList.isNotEmpty);
+        
       } catch (e) {
         fail('Exception thrown: $e');
       }
     });
   });
+}
+
+class _GitHubIssue {
+  final String title;
+  final int number;
+  final String userHandle;
+
+  _GitHubIssue({
+    required this.title,
+    required this.number,
+    required this.userHandle,
+  });
+
+  // Factory constructor to create a GitHubIssue object from JSON
+  factory _GitHubIssue.fromJson(Map<String, dynamic> json) {
+    return _GitHubIssue(
+      title: json['title'],
+      number: json['number'],
+      userHandle: json['user']['login'],
+    );
+  }
+
+  // Overriding the toString method to provide a string representation of the object
+  @override
+  String toString() {
+    return 'GitHubIssue{title: $title, number: $number, userHandle: $userHandle}';
+  }
 }
 
 class _User {

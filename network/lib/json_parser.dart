@@ -37,8 +37,19 @@ abstract class JsonParser<T> {
    */
 
   T parseOrThrow(String json, T Function(Map<String, dynamic>) fromJson);
+
+/**
+ * Parse as List<T> or throw `custom exception`
+ */
+  List<T> parseListOrThrow(
+      String json, T Function(Map<String, dynamic>) fromJson);
+
+
+
   /** - Pass the function reference as `toJson` */
   String toJsonOrThrow(T value, Map<String, dynamic> Function(T) toJson);
+
+
   /**
    * - Check if the Json is instance of T means if the Json is parsable to T or not
    * - `return`  a `boolean`
@@ -47,20 +58,20 @@ abstract class JsonParser<T> {
    */
   bool isJsonOfType(String json, T Function(Map<String, dynamic>) fromJson);
 
+
   /**
  * Parse the given json and return an instance of ServerFeedback.
  * Throws custom exception if the parsing fails.
  * To know the user case of it see the `ServerFeedback` docs
  */
-ServerFeedback parseAsServerFeedbackOrThrow(String json);
+  ServerFeedback parseAsServerFeedbackOrThrow(String json);
 
-  static JsonParser<T> create<T>() {
-    return GenericJsonParser<T>._internal();
-  }
+  static JsonParser<T> create<T>()=> JsonParserImpl<T>._internal();
+
 }
 
-class GenericJsonParser<T> implements JsonParser<T> {
-  GenericJsonParser._internal();
+class JsonParserImpl<T> implements JsonParser<T> {
+  JsonParserImpl._internal();
 
   @override
   T parseOrThrow(String json, T Function(Map<String, dynamic>) fromJson) {
@@ -72,6 +83,7 @@ class GenericJsonParser<T> implements JsonParser<T> {
     }
   }
 
+
   @override
   String toJsonOrThrow(T value, Map<String, dynamic> Function(T) toJson) {
     try {
@@ -81,7 +93,9 @@ class GenericJsonParser<T> implements JsonParser<T> {
       throw toCustomException(e);
     }
   }
-   @override
+
+
+  @override
   bool isJsonOfType(String json, T Function(Map<String, dynamic>) fromJson) {
     try {
       final Map<String, dynamic> jsonData = jsonDecode(json);
@@ -91,14 +105,29 @@ class GenericJsonParser<T> implements JsonParser<T> {
       return false; // If any error occurs, it's not of type T
     }
   }
-  @override
-ServerFeedback parseAsServerFeedbackOrThrow(String json) {
-  try {
-    final Map<String, dynamic> jsonData = jsonDecode(json);
-    return ServerFeedback.fromJson(jsonData);
-  } catch (e) {
-    throw toCustomException(e);
-  }
-}
 
+
+  @override
+  List<T> parseListOrThrow(
+      String json, T Function(Map<String, dynamic>) fromJson) {
+    try {
+      final List<dynamic> jsonDataList = jsonDecode(json) as List<dynamic>;
+      return jsonDataList
+          .map((jsonItem) => fromJson(jsonItem as Map<String, dynamic>))
+          .toList(); // Parse each item
+    } catch (e) {
+      throw toCustomException(e);
+    }
+  }
+
+
+  @override
+  ServerFeedback parseAsServerFeedbackOrThrow(String json) {
+    try {
+      final Map<String, dynamic> jsonData = jsonDecode(json);
+      return ServerFeedback.fromJson(jsonData);
+    } catch (e) {
+      throw toCustomException(e);
+    }
+  }
 }

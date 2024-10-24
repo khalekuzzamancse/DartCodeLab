@@ -1,8 +1,8 @@
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+
 import 'json_parser.dart';
 
-abstract class ApiClient {
+abstract class ApiClient<T> {
 /**
  * - `Return` the retrieved raw `json `or throws `Custom exception`
  * 
@@ -21,10 +21,16 @@ abstract class ApiClient {
   Future<T> readParseOrThrow<T>(
       String url, T Function(Map<String, dynamic>) fromJson);
 
-  static ApiClient create() => ApiClientImpl._internal();
+/**
+ * Return the list of T from the given Json, if parse failed throws `CustomException`
+ */
+  Future<List<T>> readParseListOrThrow<T>(
+      String url, T Function(Map<String, dynamic>) fromJson);
+
+  static ApiClient<T> create<T>() => ApiClientImpl<T>._internal();
 }
 
-class ApiClientImpl implements ApiClient {
+class ApiClientImpl<T> implements ApiClient<T> {
   ApiClientImpl._internal();
 
   @override
@@ -46,5 +52,15 @@ class ApiClientImpl implements ApiClient {
     final rawJson = await readOrThrow(url);
     final parser = JsonParser.create();
     return parser.parseOrThrow(rawJson, fromJson);
+  }
+
+  @override
+  Future<List<T>> readParseListOrThrow<T>(
+      String url, T Function(Map<String, dynamic>) fromJson) async {
+    final rawJson =
+        await readOrThrow(url); // Fetch raw JSON string from the URL
+    final parser = JsonParser.create<T>(); // Create a JsonParser instance for T
+    return parser.parseListOrThrow(
+        rawJson, fromJson); // Parse the JSON as a list of T
   }
 }

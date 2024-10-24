@@ -27,3 +27,4 @@ has stable version we will move to that,but the client packages should worry abo
 
 ### How to use it ?
 - Check the `test` directory to find how should be it used
+- Most of the method for defined in `ApiClient` so you can directly use it instead of separately use the parser, under the hood the `ApiClient` use the parser to pares

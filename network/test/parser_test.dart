@@ -1,12 +1,11 @@
 import 'package:test/test.dart';
-
-import '../lib/json_parser.dart';
+import 'package:network/network_factory.dart';
 import 'package:network/server_feedback_entity.dart';
 
 void main() {
   group('JsonParser and MyModel Tests', () {
     test('should correctly parse JSON into MyModel', () {
-      final parser = JsonParser.create();
+      final parser = NetworkFactory.createJsonParser<_Model>();
       final jsonString = '{"name": "John", "age": 30}';
 
       _Model myModel = parser.parseOrThrow(jsonString, _Model.fromJson);
@@ -16,7 +15,7 @@ void main() {
     });
 
     test('should correctly serialize MyModel to JSON', () {
-      final parser = JsonParser.create();
+      final parser = NetworkFactory.createJsonParser<_Model>();
       final myModel = _Model(name: 'John', age: 30);
 
       String jsonOutput =
@@ -24,8 +23,10 @@ void main() {
 
       expect(jsonOutput, '{"name":"John","age":30}');
     });
+
+    
     test('should check if JSON is of type _Model', () {
-      final parser = JsonParser.create<_Model>();
+      final parser = NetworkFactory.createJsonParser<_Model>();
 
       // Valid _Model JSON
       final validJsonString = '{"name": "John", "age": 30}';
@@ -41,7 +42,7 @@ void main() {
       expect(isInvalidModel, isFalse);
 
       // Test with ServerFeedback parser
-      final parserFeedback = JsonParser.create<ServerFeedback>();
+      final parserFeedback = NetworkFactory.createJsonParser<ServerFeedback>();
       bool isServerFeedback = parserFeedback.isJsonOfType(
           invalidJsonString, ServerFeedback.fromJson);
       print('Is invalid JSON of type ServerFeedback: $isServerFeedback');
